@@ -1,15 +1,19 @@
 const Card = require('../models/card');
+const {
+  ERROR_NOT_FOUND,
+  ERROR_INTERNAL_SERVER,
+} = require('../utils/utils');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => {
       if (cards.length === 0) {
-        res.status(400).send({ message: 'Карточки не найдены.' });
+        res.status(ERROR_NOT_FOUND).send({ message: 'Карточки не найдены.' });
         return;
       }
       res.status(200).send(cards);
     })
-    .catch(() => res.status(500).send({ message: 'Внутренняя ошибка сервера.' }));
+    .catch(() => res.status(ERROR_INTERNAL_SERVER).send({ message: 'Внутренняя ошибка сервера.' }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -17,19 +21,19 @@ module.exports.createCard = (req, res) => {
 
   Card.create({ name, link })
     .then((card) => res.status(200).send(card))
-    .catch(() => res.status(500).send({ message: 'Внутренняя ошибка сервера.' }));
+    .catch(() => res.status(ERROR_INTERNAL_SERVER).send({ message: 'Внутренняя ошибка сервера.' }));
 };
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Карточка не найдена.' });
+        res.status(ERROR_NOT_FOUND).send({ message: 'Карточка не найдена.' });
         return;
       }
       res.status(200).send(card);
     })
-    .catch(() => res.status(500).send({ message: 'Внутренняя ошибка сервера.' }));
+    .catch(() => res.status(ERROR_INTERNAL_SERVER).send({ message: 'Внутренняя ошибка сервера.' }));
 };
 
 module.exports.likeCard = (req, res) => {
@@ -39,7 +43,7 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.status(200).send(card))
-    .catch(() => res.status(500).send({ message: 'Внутренняя ошибка сервера.' }));
+    .catch(() => res.status(ERROR_INTERNAL_SERVER).send({ message: 'Внутренняя ошибка сервера.' }));
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -49,5 +53,5 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.status(200).send(card))
-    .catch(() => res.status(500).send({ message: 'Внутренняя ошибка сервера.' }));
+    .catch(() => res.status(ERROR_INTERNAL_SERVER).send({ message: 'Внутренняя ошибка сервера.' }));
 };
