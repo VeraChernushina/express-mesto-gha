@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const {
+  ERROR_NOT_FOUND,
   errorsHandler,
 } = require('../utils/utils');
 
@@ -12,7 +13,12 @@ module.exports.getUsers = (req, res) => {
 // Получение пользователя по его id
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
-    .then((user) => res.status(200).send(user))
+    .then((user) => {
+      if (!user) {
+        return res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' });
+      }
+      return res.status(200).send(user);
+    })
     .catch((err) => errorsHandler(err, res));
 };
 // Создание нового пользователя
@@ -28,7 +34,7 @@ module.exports.updateUser = (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
     { name, about },
-    { new: true },
+    { new: true, runValidators: true },
   )
     .then((user) => res.status(200).send(user))
     .catch((err) => errorsHandler(err, res));
@@ -39,7 +45,7 @@ module.exports.updateAvatar = (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
     { avatar },
-    { new: true },
+    { new: true, runValidators: true },
   )
     .then((user) => res.status(200).send(user))
     .catch((err) => errorsHandler(err, res));
