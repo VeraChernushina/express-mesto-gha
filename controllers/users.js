@@ -1,29 +1,8 @@
 const bcrypt = require("bcryptjs");
-const user = require("../models/user");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
 const { ERROR_NOT_FOUND, errorsHandler } = require("../utils/utils");
-
-// Получение пользователей
-module.exports.getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => errorsHandler(err, res));
-};
-
-// Получение пользователя по его id
-module.exports.getUserById = (req, res) => {
-  User.findById(req.params.userId)
-    .then((user) => {
-      if (!user) {
-        return res
-          .status(ERROR_NOT_FOUND)
-          .send({ message: "Пользователь не найден" });
-      }
-      return res.status(200).send(user);
-    })
-    .catch((err) => errorsHandler(err, res));
-};
 
 // Создание нового пользователя
 module.exports.createUser = (req, res) => {
@@ -46,6 +25,49 @@ module.exports.createUser = (req, res) => {
         _id: user._id,
         email: user.email,
       });
+    })
+    .catch((err) => errorsHandler(err, res));
+};
+
+// Аутентификация пользователя
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      // создадим токен
+      const token = jwt.sign(
+        { _id: user._id },
+        {
+          expiresIn: "7d",
+        }
+      );
+
+      // вернём токен
+      res.send({ token });
+    })
+    .catch((err) => {
+      // возвращаем ошибку аутентификации
+      res.status(401).send({ message: err.message });
+    });
+};
+
+// Получение пользователей
+module.exports.getUsers = (req, res) => {
+  User.find({})
+    .then((users) => res.status(200).send(users))
+    .catch((err) => errorsHandler(err, res));
+};
+
+// Получение пользователя по его id
+module.exports.getUserById = (req, res) => {
+  User.findById(req.params.userId)
+    .then((user) => {
+      if (!user) {
+        return res
+          .status(ERROR_NOT_FOUND)
+          .send({ message: "Пользователь не найден" });
+      }
+      return res.status(200).send(user);
     })
     .catch((err) => errorsHandler(err, res));
 };
