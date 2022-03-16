@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { createUser, login } = require('./controllers/users');
+const auth = require('./middlewares/auth');
 const { ERROR_NOT_FOUND } = require('./utils/utils');
 
 const { PORT = 3000 } = process.env;
@@ -26,6 +27,10 @@ app.use((req, res, next) => {
 app.post('/signin', login);
 app.post('/signup', createUser);
 
+// авторизация
+app.use(auth);
+
+// роуты, которым нужна авторизация
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
