@@ -47,6 +47,22 @@ module.exports.login = (req, res) => {
     });
 };
 
+// возвращает информацию о текущем пользователе
+module.exports.getCurrentUser = (req, res, next) => {
+  const { _id } = req.user;
+  User.findById(_id).then((user) => {
+    // проверяем, есть ли пользователь с таким id
+    if (!user) {
+      return Promise.reject(new Error('Пользователь не найден.'));
+    }
+
+    // возвращаем пользователя, если он есть
+    return res.status(200).send(user);
+  }).catch((err) => {
+    next(err);
+  });
+};
+
 // Получение пользователей
 module.exports.getUsers = (req, res) => {
   User.find({})
