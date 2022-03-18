@@ -2,20 +2,27 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const ErrorConflict = require('../errors/ErrorConflict');
+const ValidationError = require('../errors/ValidationError');
 
 const { ERROR_NOT_FOUND, errorsHandler } = require('../utils/utils');
 
 // Создание нового пользователя
 module.exports.createUser = (req, res, next) => {
-  User.findOne(req.body.email).then((user) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return next(new ValidationError('Неправильный логин или пароль.'));
+  }
+
+  return User.findOne(email).then((user) => {
     if (user) {
-      throw new ErrorConflict(`Пользователь с ${req.body.email} уже существует.`);
+      throw new ErrorConflict(`Пользователь с ${email} уже существует.`);
     }
 
-    return bcrypt.hash(req.body.password, 10);
+    return bcrypt.hash(password, 10);
   })
     .then((hash) => User.create({
-      email: req.body.email,
+      email,
       password: hash,
       name: req.body.name,
       about: req.body.about,
