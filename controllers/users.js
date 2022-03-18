@@ -1,13 +1,19 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const ErrorConflict = require('../errors/ErrorConflict');
 
 const { ERROR_NOT_FOUND, errorsHandler } = require('../utils/utils');
 
 // Создание нового пользователя
 module.exports.createUser = (req, res) => {
-  bcrypt
-    .hash(req.body.password, 10)
+  User.findOne(req.body.email).then((user) => {
+    if (user) {
+      throw new ErrorConflict(`Пользователь с ${req.body.email} уже существует.`);
+    }
+
+    return bcrypt.hash(req.body.password, 10);
+  })
     .then((hash) => User.create({
       email: req.body.email,
       password: hash,
