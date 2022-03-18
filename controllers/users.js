@@ -6,7 +6,7 @@ const ErrorConflict = require('../errors/ErrorConflict');
 const { ERROR_NOT_FOUND, errorsHandler } = require('../utils/utils');
 
 // Создание нового пользователя
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   User.findOne(req.body.email).then((user) => {
     if (user) {
       throw new ErrorConflict(`Пользователь с ${req.body.email} уже существует.`);
@@ -28,7 +28,7 @@ module.exports.createUser = (req, res) => {
       _id: user._id,
       email: user.email,
     }))
-    .catch((err) => errorsHandler(err, res));
+    .catch(next);
 };
 
 // Аутентификация пользователя
