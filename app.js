@@ -4,7 +4,9 @@ const bodyParser = require('body-parser');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
-const { ERROR_NOT_FOUND } = require('./utils/utils');
+const {
+  signUp, signIn,
+} = require('./middlewares/validations');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -17,8 +19,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', signIn, login);
+app.post('/signup', signUp, createUser);
 
 // авторизация
 app.use(auth);
@@ -28,7 +30,5 @@ app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
 app.use(errorHandler);
-
-app.use((req, res) => res.status(ERROR_NOT_FOUND).send({ message: 'Страница не найдена' }));
 
 app.listen(PORT);
