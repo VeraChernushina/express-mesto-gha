@@ -7,6 +7,8 @@
 * Express.js
 * MongoDB
 * Mongoose
+* Celebrate, Joi
+* bcrypt
 
 
 ## Запуск проекта
