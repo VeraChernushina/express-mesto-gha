@@ -10,12 +10,12 @@ module.exports.createUser = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return new BadRequestError('Неправильный логин или пароль.');
+    throw new BadRequestError('Неправильный логин или пароль.');
   }
 
   return User.findOne({ email }).then((user) => {
     if (user) {
-      return new ConflictError(`Пользователь с ${email} уже существует.`);
+      throw new ConflictError(`Пользователь с ${email} уже существует.`);
     }
 
     return bcrypt.hash(password, 10);
@@ -35,8 +35,8 @@ module.exports.createUser = (req, res, next) => {
       email: user.email,
     }))
     .catch((err) => {
-      if (err.code === 11000) {
-        return new ConflictError('Пользователь с таким email уже существует.');
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Неверные данные о пользователе или неверная ссылка на аватар.'));
       }
       return next(err);
     });
@@ -110,8 +110,8 @@ module.exports.updateUser = (req, res, next) => {
   )
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError('Неверный тип данных.'));
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Неверный тип данных.'));
       }
       return next(err);
     });
@@ -127,8 +127,8 @@ module.exports.updateAvatar = (req, res, next) => {
   )
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError('Неверная ссылка'));
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Неверная ссылка'));
       }
       return next(err);
     });

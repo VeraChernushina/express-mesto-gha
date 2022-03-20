@@ -1,9 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
+const NotFoundError = require('./errors/NotFoundError');
 const {
   signUp, signIn,
 } = require('./middlewares/validations');
@@ -22,13 +24,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/signin', signIn, login);
 app.post('/signup', signUp, createUser);
 
-// авторизация
 app.use(auth);
-
 // роуты, которым нужна авторизация
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
+// запрос к несуществующему роуту
+app.use('*', (req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
+});
+
+app.use(errors());
 app.use(errorHandler);
 
 app.listen(PORT);
