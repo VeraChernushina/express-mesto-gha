@@ -27,7 +27,37 @@ const signUp = celebrate({
   }),
 });
 
-/* -------------- Карточки ----------------- */
+/* ---------------- Пользователь ------------------ */
+// валидация userId
+const userIdValidation = celebrate({
+  params: Joi.object.keys({
+    userId: Joi.string().required().length(24).hex(),
+  }),
+});
+
+// валидация обновления профиля пользователя
+const updateUserValidation = celebrate({
+  body: Joi.object.keys({
+    name: Joi.string().required().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
+  }),
+});
+
+// валидация обновления аватара пользователя
+const updateAvatarValidation = celebrate({
+  body: Joi.object.keys({
+    body: Joi.object.keys({
+      avatar: Joi.string().custom((value) => {
+        if (!validator.isURL(value, { require_protocol: true })) {
+          throw new BadRequestError('Неправильный формат URL адреса');
+        }
+        return value;
+      }),
+    }),
+  }),
+});
+
+/* ---------------- Карточки ----------------- */
 // валидация создания новой карточки
 const createCardValidation = celebrate({
   body: Joi.object.keys({
@@ -42,5 +72,10 @@ const createCardValidation = celebrate({
 });
 
 module.exports = {
-  signUp, signIn, createCardValidation,
+  signUp,
+  signIn,
+  userIdValidation,
+  updateUserValidation,
+  updateAvatarValidation,
+  createCardValidation,
 };
