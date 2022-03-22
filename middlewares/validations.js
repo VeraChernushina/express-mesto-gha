@@ -71,6 +71,13 @@ const createCardValidation = celebrate({
   }),
 });
 
+// валидация cardId
+const cardIdValidation = celebrate({
+  params: Joi.object.keys({
+    cardId: Joi.string().required().length(24).hex(),
+  }),
+});
+
 module.exports = {
   signUp,
   signIn,
@@ -78,4 +85,5 @@ module.exports = {
   updateUserValidation,
   updateAvatarValidation,
   createCardValidation,
+  cardIdValidation,
 };
