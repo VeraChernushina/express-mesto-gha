@@ -24,15 +24,20 @@ module.exports.createCard = (req, res, next) => {
 };
 // Удаление карточки
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  const { cardId } = req.params;
+  const { userId } = req.user._id;
+  Card.findById(cardId)
+    // eslint-disable-next-line consistent-return
     .then((card) => {
       if (!card) {
-        return next(new NotFoundError('Карточка не найдена.'));
+        throw new NotFoundError('Карточка не найдена.');
       }
-      if (card.owner.valueOf() !== req.user._id) {
-        return next(new ForbiddenError('Нельзя удалить чужую карточку!'));
+      if (card.owner !== userId) {
+        throw new ForbiddenError('Нельзя удалить чужую карточку!');
       }
-      return res.status(200).send(card);
+      Card.findByIdAndRemove(cardId)
+        .then((deletedCard) => res.status(200).send(deletedCard))
+        .catch(next);
     })
     .catch(next);
 };
