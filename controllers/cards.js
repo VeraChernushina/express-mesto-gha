@@ -25,14 +25,14 @@ module.exports.createCard = (req, res, next) => {
 // Удаление карточки
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
-  const { userId } = req.user._id;
+  const { _id } = req.user;
   Card.findById(cardId)
     // eslint-disable-next-line consistent-return
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточка не найдена.');
       }
-      if (card.owner !== userId) {
+      if (card.owner.valueOf() !== _id) {
         throw new ForbiddenError('Нельзя удалить чужую карточку!');
       }
       Card.findByIdAndRemove(cardId)
